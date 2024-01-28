@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Selection and Video Display</title>
+</head>
+<body>
+    <h2>Select a Camera</h2>
+    <select id="cameraList"></select>
+    <button onclick="startCamera()">Start Camera</button>
+    <h2>Camera Feed</h2>
+    <video id="videoElement" autoplay playsinline width="640" height="480"></video>
+
+    <script>
+        let videoElement = document.getElementById('videoElement');
+        let cameraList = document.getElementById('cameraList');
+
+        navigator.mediaDevices.enumerateDevices()
+            .then(function(devices) {
+                devices.forEach(function(device) {
+                    if (device.kind === 'videoinput') {
+                        let option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || 'Camera ' + (cameraList.length + 1);
+                        cameraList.appendChild(option);
+                    }
+                });
+            });
+
+        function startCamera() {
+            if (cameraList.length === 0) {
+                console.log("No cameras found.");
+                return;
+            }
+            let selectedCameraId = cameraList.value;
+            navigator.mediaDevices.getUserMedia({
+                video: { deviceId: { exact: selectedCameraId } }
+            })
+            .then(function(stream) {
+                videoElement.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.log("Error accessing camera: ", error);
+            });
+        }
+    </script>
+</body>
+</html>
